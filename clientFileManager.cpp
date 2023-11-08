@@ -4,7 +4,7 @@
 
 int main(int argc,char** argv)
 {
-    FileManager *fm=new FileManager("./dirprueba/");
+    fileManager *fm=new fileManager("./dirprueba/"); //cambiamos FileManager(esta en el imp) por fileManager(esta en el stub)
     vector<string*>* vfiles=fm->listFiles();
     cout<<"Lista de ficheros en el directorio de prueba:\n";
     for(unsigned int i=0;i<vfiles->size();++i)

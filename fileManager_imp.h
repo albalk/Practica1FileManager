@@ -31,13 +31,26 @@ class FileManager_imp{
             //ejecuta
             switch(operacion){
                 case constructorOp:{
-                    //f=new FileManager();    //clase declarada en stub
-                    //declarar tamaño string
-                    //unpack tamaño string
-                    //unpackv string con el nombre del fichero
-                    //pack MSG_OK
+                    int tam = unpack<int>(rpcIn); //declarar y unpack tamaño string
+                    std::string nombre; //declara path
+
+                    nombre.resize(tam); //resize
+                    unpackv(rpcIn, (char*)nombre.data(), tam); //unpackv string con el nombre del fichero
+                    
+                    f=new FileManager(nombre);    //clase declarada en stub
+                    pack(rpcOut, (unsigned char)MSG_OK);//pack MSG_OK
                 }break;
                 case listFilesOp:{
+                    vector<string*>* vfiles=f->listFiles(); //llamada a la funcion
+                    //int tam = sizeof(vfiles);
+
+                    //packv vfiles
+                    pack(rpcOut, (unsigned char)MSG_OK); //pack mensaje
+                    
+                    //return vfiles;
+
+                    //liberar memoria
+                    //llamada a freeListedFilesOp
 
                 }break;
                 case readFileOp:{
@@ -47,6 +60,17 @@ class FileManager_imp{
 
                 }break;
                 case freeListedFilesOp:{
+                    int tam = unpack<int>(rpcIn);//unpack tamaño
+                    //unpackv
+
+
+                    vector<string*>* vfiles;
+                    unpackv(rpcIn, vfiles, tam);
+                    f->freeListedFiles(vfiles);
+
+                    pack(rpcOut, (unsigned char)MSG_OK);
+
+                    //liberar memoria
 
                 }break;
                 default:{
