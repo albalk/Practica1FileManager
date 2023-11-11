@@ -55,7 +55,7 @@ class fileManager {
 
             std::cout<<"\tListFiles paso7\n";
             int tam =unpack<int>(rpcIn);
-            std::cout<<"\ttam: "<<tam<<"\n";
+            //std::cout<<"\ttam: "<<tam<<"\n";
             vector<string*>* vfiles = new std::vector<std::string*>(); //inicializar
 
             //vfiles->resize(tam);
@@ -64,17 +64,17 @@ class fileManager {
             //unpackv(rpcIn, (char*)vfiles, tam);
 
             for(int i=0; i<tam; i++){
-                int tam2=unpack<int>(rpcIn);
-                unpackv(rpcIn, vfiles[i].data(), tam2);
-                //resize
-                //vfiles->push_back()
+                int tam2=unpack<int>(rpcIn); //desempaquetar tamaño del elemento
+                char temp[tam2]; //temporal para guardar los string recibidos
+                unpackv(rpcIn, temp, tam2); //desempaquetar el elemento en la variable temporal
+                vfiles->push_back(new std::string(temp)); //guardar el elemento en la lista
             }
 
             std::cout<<"\tListFiles paso9\n";
             int ok = unpack<unsigned char>(rpcIn);
             //si no es ok error
             if(ok!=MSG_OK){
-                std::cout<<"Error"<<__FILE__<<":"<<__LINE__<<"\n";
+                std::cout<<"Error al recibir OK en listFiles  "<<__FILE__<<":"<<__LINE__<<"\n";
             }
 
             return vfiles;
@@ -86,21 +86,29 @@ class fileManager {
             fileManagerOp op=readFileOp;
             std::vector<unsigned char> rpcOut;
             std::vector<unsigned char> rpcIn;
+            std::cout<<"\tReadFiles paso1\n";
 
             pack(rpcOut, op);   //empaqutea la operacion
-            
+            std::cout<<"\tReadFiles paso2\n";
+
             int tamf= strlen(fileName)+1; //tamaño del file
             int tamd = strlen(data)+1; //tamaño de data
             pack(rpcOut, tamf);
             pack(rpcOut, tamd);
+            std::cout<<"\tReadFiles paso3\n";
             packv(rpcOut, fileName, tamf);
-            packv(rpcOut, &data, tamd);  //seguramnete tremendo error de datos
-            pack(rpcOut, &dataLength);
+            std::cout<<"\tReadFiles paso4\n";
+            packv(rpcOut, data, tamd);  //seguramnete tremendo error de datos
+            std::cout<<"\tReadFiles paso5\n";
+            pack(rpcOut, dataLength);
+            std::cout<<"\tReadFiles paso6\n";
 
             sendMSG(serverConection.serverId, rpcOut);
             recvMSG(serverConection.serverId,  rpcIn);
-
+            
+            std::cout<<"\tReadFiles paso12\n";
             int ok = unpack<unsigned char>(rpcIn);
+            std::cout<<"\tContenido OK: "<<ok<<"\n";
             //si no es ok error
             if(ok!=MSG_OK){
                 std::cout<<"Error"<<__FILE__<<":"<<__LINE__<<"\n";
@@ -138,19 +146,33 @@ class fileManager {
             fileManagerOp op=freeListedFilesOp;
             std::vector<unsigned char> rpcOut;
             std::vector<unsigned char> rpcIn;
+            std::cout<<"\tFreeListedFiles paso1\n";
 
             pack(rpcOut, op);   //empaqutea la operacion
+            std::cout<<"\tFreeListedFiles paso2\n";
 
-            int tam = sizeof(fileList);
+            int tam = fileList->size();
             pack(rpcOut, tam);
-            packv(rpcOut, fileList, tam);
+            std::cout<<"\tFreeListedFiles paso3\n";
+
+            for(int i=0; i<tam; i++){ //recorrer fileList
+                int tam2=fileList[i].size(); //inicializar el tamaño de cada elemento del vector
+                //std::cout<<"\ttam :"<<tam2<<"\n";
+                pack(rpcOut, tam2); //empqaquetar el tamaño de cada elemento
+                packv(rpcOut, fileList[i].data(), tam2); //empaquetar
+            }
+
+            std::cout<<"\tFreeListedFiles paso4\n";
 
             sendMSG(serverConection.serverId, rpcOut);
             recvMSG(serverConection.serverId,  rpcIn);
 
-            if(rpcIn[0]!=MSG_OK){
+            std::cout<<"\tFreeListedFiles paso9\n";
+            int ok = unpack<unsigned char>(rpcIn);
+            if(ok!=MSG_OK){
                 std::cout<<"Error"<<__FILE__<<":"<<__LINE__<<"\n";
             }
+
         }
 
     //añadir free de los files
