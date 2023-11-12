@@ -31,99 +31,110 @@ class FileManager_imp{
             //ejecuta
             switch(operacion){
                 case constructorOp:{
-                    std::cout<<"\tConstructor paso4\n";
-                    int tam = unpack<int>(rpcIn); //declarar y unpack tamaño string
-                    std::string nombre; //declara path
+                    //declarar y desempaquetar el tamaño del string
+                    int tam = unpack<int>(rpcIn);
+                    //declara path
+                    std::string nombre;
 
-                    std::cout<<"\tConstructor paso5\n";
                     nombre.resize(tam); //resize
-                    unpackv(rpcIn, (char*)nombre.data(), tam); //unpackv string con el nombre del fichero
+                    //desempaqueta el nombre del fichero
+                    unpackv(rpcIn, (char*)nombre.data(), tam);
                     
-                    std::cout<<"\tConstructor paso6\n";
-                    f=new FileManager(nombre);
-                    pack(rpcOut, (unsigned char)MSG_OK);//pack MSG_OK
+                    f=new FileManager(nombre); //llamada al constructor
+
+                    pack(rpcOut, (unsigned char)MSG_OK); //empaqueta MSG_OK
+
                 }break;
                 case listFilesOp:{
-                    std::cout<<"\tListFiles paso3\n";
-                    vector<string*>* vfiles = new std::vector<std::string*>; //declarar e inicializar
-                    vfiles=f->listFiles(); //llamada a la funcion
-                    int tam = vfiles->size();
-                    //std::cout<<"\ttam: "<<tam<<"\n";
-                    std::cout<<"\tListFiles paso4\n";
-                    pack(rpcOut, tam);
-                    //packv vfiles
-                    std::cout<<"\tListFiles paso5\n";
-                    //packv(rpcOut, (char*)vfiles, tam);
+                    //declarar e inicializar el vector de strings
+                    vector<string*>* vfiles = new std::vector<std::string*>;
+                    vfiles=f->listFiles(); //llamada a la funcion listFiles
 
-                    for(int i=0; i<tam; i++){ //recorrer vfiles
-                        int tam2=vfiles[i].size(); //inicializar el tamaño de cada elemento del vector
+                    //inicializar el tamaño del vector
+                    int tam = vfiles->size();
+                    //empaquetar el tamaño
+                    pack(rpcOut, tam);
+
+                    //recorrer vfiles
+                    for(int i=0; i<tam; i++){
+                        //inicializar el tamaño de cada elemento del vector
+                        int tam2=vfiles[i].size();
                         //std::cout<<"\ttam :"<<tam2<<"\n";
-                        pack(rpcOut, tam2); //empqaquetar el tamaño de cada elemento
-                        packv(rpcOut, vfiles[i].data(), tam2); //empaquetar
+                        //empqaquetar el tamaño de cada elemento
+                        pack(rpcOut, tam2); 
+                        //empaquetar el contenido del elemento actual
+                        packv(rpcOut, vfiles[i].data(), tam2);
                     }
 
-                    std::cout<<"\tListFiles paso6\n";
-                    pack(rpcOut, (unsigned char)MSG_OK); //pack mensaje
+                    pack(rpcOut, (unsigned char)MSG_OK); //empaqueta MSG_OK
                     
 
                     //liberar memoria
 
                 }break;
                 case readFileOp:{
-                    std::cout<<"\tReadFiles paso7\n";
+                    //desempaqueta los tamaños del file y de data
                     int tamf = unpack<int>(rpcIn);
                     int tamd = unpack<int>(rpcIn);
-                    std::cout<<"\tReadFiles paso7,5\n";
 
+                    //reserva de memoria
                     char filename[tamf];
                     char data[tamd];
+
+                    //desempaquetar contenido de filename
                     unpackv(rpcIn, (char*)filename, tamf);
-                    std::cout<<"\tReadFiles paso8\n";
+                    //desempaquetar contenido de data
                     unpackv(rpcIn, (char*)&data, tamd);
-                    std::cout<<"\tReadFiles paso9\n";
+                    //desempaquetar dataLength
                     long int dataLength = unpack<long int>(rpcIn);
-                    std::cout<<"\tReadFiles paso10\n";
 
-                    //f->readFile((char*)filename, *data, dataLength);
-                    std::cout<<"\tReadFiles paso11\n";
+                    f->readFile((char*)filename, *data, dataLength); //llamada a la función readFile
 
-                    pack(rpcOut, (unsigned char)MSG_OK);
+                    pack(rpcOut, (unsigned char)MSG_OK); //empaqueta MSG_OK
 
 
                 }break;
                 case writeFileOp:{
+                    //desempaqueta los tamaños del file y de data
                     int tamf = unpack<int>(rpcIn);
                     int tamd = unpack<int>(rpcIn);
+
+                    //reserva de memoria
                     char filename[tamf];
                     char data[tamd];
+
+                    //desempaquetar contenido de filename
                     unpackv(rpcIn, (char*)filename, tamf);
+                    //desempaquetar contenido de data
                     unpackv(rpcIn, (char*)data, tamd);
+                    //desempaquetar dataLength
                     long int dataLength = unpack<long int>(rpcIn);
 
-                    f->writeFile(filename, data, dataLength);
+                    f->writeFile(filename, data, dataLength); //llamada a la función writeFile
 
-                    pack(rpcOut, (unsigned char)MSG_OK);
+                    pack(rpcOut, (unsigned char)MSG_OK); //empaqueta MSG_OK
 
                 }break;
                 case freeListedFilesOp:{
-                    int tam = unpack<int>(rpcIn);//unpack tamaño
-                    std::cout<<"\tFreeListedFiles paso5\n";
-                    //unpackv
-                    vector<string*>* fileList = new std::vector<std::string*>(); //inicializar
+                    //desempaquetar tamaño del vector
+                    int tam = unpack<int>(rpcIn);
+                    //inicializar vector
+                    vector<string*>* fileList = new std::vector<std::string*>(); 
                     
-                    std::cout<<"\tFreeListedFiles paso6\n";
+                    //recorrer fileList
                     for(int i=0; i<tam; i++){
-                        int tam2=unpack<int>(rpcIn); //desempaquetar tamaño del elemento
+                        //desempaquetar tamaño del elemento
+                        int tam2=unpack<int>(rpcIn); 
                         char temp[tam2]; //temporal para guardar los string recibidos
-                        unpackv(rpcIn, temp, tam2); //desempaquetar el elemento en la variable temporal
-                        fileList->push_back(new std::string(temp)); //guardar el elemento en la lista
+                        //desempaquetar el elemento en la variable temporal
+                        unpackv(rpcIn, temp, tam2); 
+                        //guardar el elemento en el vector
+                        fileList->push_back(new std::string(temp)); 
                     }
 
-                    std::cout<<"\tFreeListedFiles paso7\n";
-                    f->freeListedFiles(fileList);
+                    f->freeListedFiles(fileList); //llamada a la funcion freeListedFiles
 
-                    std::cout<<"\tFreeListedFiles paso8\n";
-                    pack(rpcOut, (unsigned char)MSG_OK);
+                    pack(rpcOut, (unsigned char)MSG_OK); //empaqueta MSG_OK
 
                     //liberar memoria
 
@@ -135,9 +146,9 @@ class FileManager_imp{
             }
 
             //devuelve resultados
-            std::cout<<"\tAntes de devolver los resultados\n";
+            //std::cout<<"\tAntes de devolver los resultados\n";
             sendMSG(clientId, rpcOut);
-            std::cout<<"\tDespues de devolver los resultados\n";
+            //std::cout<<"\tDespues de devolver los resultados\n";
         }
 
 };
