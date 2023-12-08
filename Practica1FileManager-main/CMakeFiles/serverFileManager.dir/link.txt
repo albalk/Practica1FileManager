@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/serverFileManager.dir/utils.cpp.o CMakeFiles/serverFileManager.dir/serverFileManager.cpp.o CMakeFiles/serverFileManager.dir/filemanager.cpp.o  -o serverFileManager -lpthread 

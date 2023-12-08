@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/clientFileManager.dir/utils.cpp.o CMakeFiles/clientFileManager.dir/clientFileManager.cpp.o  -o clientFileManager -lpthread 
